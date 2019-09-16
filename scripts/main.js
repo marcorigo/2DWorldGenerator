@@ -1,3 +1,3 @@
 let canvas = document.getElementById('canvas')
-
-let render = new Render(canvas, 'hey', 10, 10, true)
+let world = new World(128, 0, false, false, false)
+let render = new Render(canvas, world, 10, 10, true)
