@@ -26,10 +26,11 @@ class World {
         this.worldArray.push(blockId)
     }
     generate(startX, endX) {
-        for(i = startX; i <= endX; i ++) {
-            colHeight = int(this.noiseGen.getNoise(i, this.maxY - this.minY, this.chunkSize, this.noise))
-            for(j = this.minY; j < this.maxY; i ++ ) {
+        for(let i = startX; i < endX; i ++) {
+            let colHeight = parseInt(this.noiseGen.getNoise(i, this.maxY - this.minY, this.chunkSize, this.noise))
+            for(let j = this.minY; j < this.maxY; j ++ ) {
                 let je = this.maxY - j
+                let blockId
                 if (je > colHeight && je < this.maxY / 3)
                     blockId = 4
                 else if (je > colHeight)
