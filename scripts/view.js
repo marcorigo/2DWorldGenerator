@@ -15,7 +15,7 @@ class RenderEngine {
         this.scale && this.attachCanvasResizeEvent()
         this.resizeCanvas(this.windowWidth, this.windowHeight)
         if(!blocksize) {
-            this.blocksize = this.windowWidth / 10
+            this.blocksize = this.windowHeight / this.worldMaxY
         }
     }
     attachCanvasResizeEvent() {
@@ -32,13 +32,13 @@ class RenderEngine {
     render(startX, startY, endX, endY) {
         console.log(this.world.worldArray)
         this.clearCanvas()
-        for(let y = startY; y < endY; y ++) {
-            for(let x = startX; x < endX; x ++) {
-                let block = this.world.worldArray[(this.worldMaxY * y) + x]
+        for(let x = startX; x < endX; x ++) { 
+            for(let y = startY; y < endY; y ++) {
+                let block = this.world.worldArray[x][y]
                 if(block != 0) {
                     let color = this.blockManager(block)
                     this.ctx.fillStyle = color;
-                    this.ctx.fillRect (x * this.blocksize ,y * this.blocksize , this.blocksize, this.blocksize)
+                    this.ctx.fillRect (x * this.blocksize ,(endY - startY - y - 1) * this.blocksize , this.blocksize, this.blocksize)
                 }
             }
         }
