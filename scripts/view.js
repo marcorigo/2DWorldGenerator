@@ -5,22 +5,26 @@ class RenderEngine {
         this.minX = this.world.minX
         this.windowWidth = options.width || window.innerWidth
         this.windowHeight = options.height || window.innerHeight
-        this.scale = options.scale || true
+        this.scale = options.scale
         this.blockSize = options.blockSize || parseInt((this.windowHeight / 50))
         this.skyColor = options.skyColor || 'lightblue'
         this.ctx = canvas.getContext('2d')
-        this.scale && this.attachCanvasResizeEvent()
-        this.maxX = parseInt(this.windowWidth / this.blockSize)
-        let u = parseInt(this.windowHeight / this.blockSize)
-        let i = parseInt(this.world.maxY / 2)
-        this.maxY = parseInt(i + u / 2)
-        this.minY = parseInt(i - u / 2)
-        console.log(i, u)
-        console.log(this.minY, this.maxY)
         this.cameraX = 0
         this.cameraY = 0
+        this.minY = 0
+        this.maxX = 0
+        this.maxY = this.world.maxY
         this.keys = {a: false, d: false, w: false, s: false}
+        this.inizialize()
+    }
+    inizialize() {
         this.keyEvents(this.keys)
+        if(this.scale) {
+            this.resizeWindow(window.innerWidth, window.innerHeight)
+            this.attachCanvasResizeEvent()
+        }
+        this.resizeCanvas()
+        this.calcViewport()
     }
     keyEvents(keys) {
         document.addEventListener('keydown', (e) => {
@@ -46,16 +50,35 @@ class RenderEngine {
     }
     attachCanvasResizeEvent() {
         window.addEventListener('resize', () => {
-            this.windowWidth = window.innerWidth
-            this.windowHeight = window.innerHeight
-            this.maxX = parseInt(this.windowWidth / this.blockSize)
-            this.resizeCanvas(this.windowWidth, this.windowHeight)
+            this.resizeWindow(window.innerWidth, window.innerHeight)
+            this.blockSize = parseInt((this.windowHeight / 50))
+            this.calcViewport()
+            this.resizeCanvas()
+            console.log('minX: ' + this.minX +
+                        ' minY: ' + this.minY +
+                        ' maxX: ' + this.maxX +
+                        ' maxY: ' + this.maxY +
+                        ' windowWidth: ' + this.windowWidth +
+                        ' windowHeight: ' + this.windowHeight +
+                        ' blockSize: ' + this.blockSize +
+                        ' canvasWidth: ' + this.canvas.width + 
+                        ' canvasHeight: ' + this.canvas.height)
         })
-        this.resizeCanvas(this.windowWidth, this.windowHeight)
     }
-    resizeCanvas(width, height) {
-        this.canvas.width = width
-        this.canvas.height = height
+    calcViewport() {
+        let blocksOnHeight = parseInt(this.windowHeight / this.blockSize)
+        let halfWorldHeight = parseInt(this.world.maxY / 2)
+        this.maxY = parseInt(halfWorldHeight + blocksOnHeight / 2)
+        this.minY = parseInt(halfWorldHeight - blocksOnHeight / 2)
+        this.maxX = parseInt(this.windowWidth / this.blockSize)
+    }
+    resizeCanvas() {
+        this.canvas.width = this.windowWidth
+        this.canvas.height = this.windowHeight
+    }
+    resizeWindow(width, height) {
+        this.windowWidth = width
+        this.windowHeight = height
     }
     render() {
         this.checkMovement()
