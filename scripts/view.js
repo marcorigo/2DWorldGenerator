@@ -21,8 +21,6 @@ class RenderEngine {
             this.windowHeight = window.innerHeight
             this.maxX = parseInt(this.windowWidth / this.blockSize)
             this.resizeCanvas(this.windowWidth, this.windowHeight)
-            this.cameraX = parseInt(this.windowWidth / 2)
-            this.cameraY = parseInt(this.windowHeight / 2)
             // TEST
             this.render()
         })
