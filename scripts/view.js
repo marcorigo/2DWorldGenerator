@@ -12,8 +12,8 @@ class RenderEngine {
         this.ctx = canvas.getContext('2d')
         this.scale && this.attachCanvasResizeEvent()
         this.maxX = parseInt(this.windowWidth / this.blockSize)
-        this.cameraX = parseInt(this.windowWidth / 2)
-        this.cameraY = parseInt(this.blockSize * 66)
+        this.cameraX = 0
+        this.cameraY = 0
     }
     attachCanvasResizeEvent() {
         window.addEventListener('resize', () => {
@@ -34,7 +34,13 @@ class RenderEngine {
     }
     render() {
         world.generate(this.minX, this.maxX)
-        this.worldRender(0 , 0, this.maxX, 150 )
+        for(let i = 0; i < this.world.worldArray[0].length; i ++) {
+            if(this.world.worldArray[0][i + 1] == 0) {
+                this.cameraY = i * this.blockSize;
+                break
+            }
+        }
+        this.worldRender(0 , 0, this.maxX, this.worldMaxY )
         this.renderCamera()
     }
     renderCamera() {
