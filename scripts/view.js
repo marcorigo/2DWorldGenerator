@@ -3,8 +3,6 @@ class RenderEngine {
         this.canvas = canvas
         this.world = world
         this.minX = this.world.minX
-        this.maxY = 100
-        this.minY = 50
         this.windowWidth = options.width || window.innerWidth
         this.windowHeight = options.height || window.innerHeight
         this.scale = options.scale || true
@@ -13,6 +11,12 @@ class RenderEngine {
         this.ctx = canvas.getContext('2d')
         this.scale && this.attachCanvasResizeEvent()
         this.maxX = parseInt(this.windowWidth / this.blockSize)
+        let u = parseInt(this.windowHeight / this.blockSize)
+        let i = parseInt(this.world.maxY / 2)
+        this.maxY = parseInt(i + u / 2)
+        this.minY = parseInt(i - u / 2)
+        console.log(i, u)
+        console.log(this.minY, this.maxY)
         this.cameraX = 0
         this.cameraY = 0
         this.keys = {a: false, d: false, w: false, s: false}
@@ -57,7 +61,6 @@ class RenderEngine {
         this.checkMovement()
         if(this.maxX > this.world.worldArray.length || this.minX === 0) {
             world.generate(this.minX, this.maxX)
-            console.log(this.world.worldArray)
         }
         if(this.cameraX === 0) {
             for(let i = 0; i < this.world.worldArray[0].length; i ++) {
