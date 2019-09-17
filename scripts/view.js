@@ -15,22 +15,25 @@ class RenderEngine {
         this.cameraX = 0
         this.cameraY = 0
         this.keys = {a: false, d: false}
-        this.keyEvents()
+        this.keyEvents(this.keys)
     }
-    keyEvents() {
-        document.addEventListener('keydown', function(e) {
+    keyEvents(keys) {
+        document.addEventListener('keydown', (e) => {
             let key = e.keyCode
-            if(key === 'a') { this.keys.a = true }
-            if(key === 'd') { this.keys.d = true }
+            if(key === 65) { keys.a = true }
+            if(key === 68) { keys.d = true }
         });
-        document.addEventListener('keyup', function(e) {
+        document.addEventListener('keyup', (e) => {
             let key = e.keyCode
-            if(key === 'a') { this.keys.a = false }
-            if(key === 'd') { this.keys.d = false }
+            if(key === 65) { keys.a = false }
+            if(key === 68) { keys.d = false }
         });
     }
     checkMovement() {
-        
+        // if(this.keys.a && this.cameraX > 0) { this.cameraX -= this.blockSize }
+        // if(this.keys.d) { this.cameraX += this.blockSize }
+        if(this.keys.a && this.minX > 0) { this.minX --; this.maxX -- }
+        if(this.keys.d) { this.minX ++; this.maxX ++ }
     }
     attachCanvasResizeEvent() {
         window.addEventListener('resize', () => {
@@ -46,8 +49,9 @@ class RenderEngine {
         this.canvas.height = height
     }
     render() {
+        // TEST
         this.checkMovement()
-        if(this.cameraX > this.world.worldArray.length || this.cameraX === 0) {
+        if(this.maxX > this.world.worldArray.length || this.minX === 0) {
             world.generate(this.minX, this.maxX)
         }
         if(this.cameraX === 0) {
@@ -58,7 +62,7 @@ class RenderEngine {
                 }
             }
         }
-        this.worldRender(0 , 0, this.maxX, this.worldMaxY )
+        this.worldRender(this.minX , 0, this.maxX, this.worldMaxY )
         this.renderCamera()
         requestAnimationFrame(this.render.bind(this))
     }
@@ -68,9 +72,9 @@ class RenderEngine {
     worldRender(startX, startY, endX, endY) {
         // console.log(startX, startY, endX, endY)
         this.clearCanvas()
-        for(let x = startX; x < endX; x ++) { 
-            for(let y = startY; y < endY; y ++) {
-                let block = this.world.worldArray[x][y]
+        for(let x = 0; x < endX - startX; x ++) { 
+            for(let y = 0; y < endY - startY; y ++) {
+                let block = this.world.worldArray[x + startX][y + startY]
                 if(block != 0) {
                     let color = this.blockManager(block)
                     this.drawBlock(x * this.blockSize ,
