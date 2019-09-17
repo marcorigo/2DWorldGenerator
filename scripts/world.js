@@ -4,7 +4,7 @@ class World {
         this.noise = options.noiseLevel || 0
         this.maxY = options.maxHeight || 150
         this.minY = options.minHeight || 0
-        this.minX = options.minWidth || 0
+        // this.minX = options.minWidth || 0
         this.seed = options.seed || this.generateSeed()
         this.worldArray = []
         this.noiseGen = new PerlinNoise(this.seed)
