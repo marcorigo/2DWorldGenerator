@@ -7,11 +7,13 @@ class RenderEngine {
         this.windowWidth = options.width || window.innerWidth
         this.windowHeight = options.height || window.innerHeight
         this.scale = options.scale || true
-        this.blockSize = options.blockSize || parseInt(this.windowHeight / this.worldMaxY)
+        this.blockSize = options.blockSize || parseInt(this.windowWidth / 100)
         this.skyColor = options.skyColor || 'lightblue'
         this.ctx = canvas.getContext('2d')
         this.scale && this.attachCanvasResizeEvent()
         this.maxX = parseInt(this.windowWidth / this.blockSize)
+        this.cameraX = parseInt(this.windowWidth / 2)
+        this.cameraY = parseInt(this.blockSize * 66)
     }
     attachCanvasResizeEvent() {
         window.addEventListener('resize', () => {
@@ -19,6 +21,8 @@ class RenderEngine {
             this.windowHeight = window.innerHeight
             this.maxX = parseInt(this.windowWidth / this.blockSize)
             this.resizeCanvas(this.windowWidth, this.windowHeight)
+            this.cameraX = parseInt(this.windowWidth / 2)
+            this.cameraY = parseInt(this.windowHeight / 2)
             // TEST
             this.render()
         })
@@ -29,11 +33,15 @@ class RenderEngine {
         this.canvas.height = height
     }
     render() {
-        let startX = this.world.worldArray.lenght || 0
-        world.generate(startX, this.maxX)
-        this.worldRender(0, 0, this.maxX, this.worldMaxY)
+        world.generate(this.minX, this.maxX)
+        this.worldRender(0 , 0, this.maxX, 150 )
+        this.renderCamera()
+    }
+    renderCamera() {
+        this.drawBlock(this.cameraX, this.cameraY, this.blockSize, this.blockSize, 'purple')
     }
     worldRender(startX, startY, endX, endY) {
+        console.log(startX, startY, endX, endY)
         this.clearCanvas()
         for(let x = startX; x < endX; x ++) { 
             for(let y = startY; y < endY; y ++) {
@@ -45,13 +53,13 @@ class RenderEngine {
                                   this.blockSize ,
                                   this.blockSize ,
                                   color)
+                    this.printBlockId(x * this.blockSize , (endY - startY - y - 1) * this.blockSize, block)
                 }
             }
         }
     }
     clearCanvas(){
-        this.ctx.fillStyle = this.skyColor
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.drawBlock(0, 0, this.canvas.width, this.canvas.height, this.skyColor)
     }
     drawBlock(x, y, width, height, color) {
         this.ctx.fillStyle = color;
@@ -59,6 +67,11 @@ class RenderEngine {
         this.ctx.lineWidth = 0.2
         this.ctx.strokeStyle = 'black'
         this.ctx.strokeRect(x ,y , width, height)
+    }
+    printBlockId(x, y, block) {
+        this.ctx.fillStyle = 'black'
+        this.ctx.font = "10px Arial";
+        this.ctx.fillText(block, x, y + 10);
     }
     blockManager(blockId) {
     if (blockId == 1)

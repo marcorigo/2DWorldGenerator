@@ -1,6 +1,6 @@
 let canvas = document.getElementById('canvas')
-let world = new World({})
-let renderEngine = new RenderEngine(canvas, world, {blockSize: 10})
+let world = new World({seed: 8137774})
+let renderEngine = new RenderEngine(canvas, world, {})
 
 
 renderEngine.render()

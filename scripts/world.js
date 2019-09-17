@@ -6,6 +6,7 @@ class World {
         this.minY = options.minHeight || 0
         this.minX = options.minWidth || 0
         this.seed = options.seed || this.generateSeed()
+        console.log('SEED: ' + this.seed)
         this.worldArray = []
         this.noiseGen = new PerlinNoise(this.seed)
     }
