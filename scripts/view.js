@@ -14,6 +14,23 @@ class RenderEngine {
         this.maxX = parseInt(this.windowWidth / this.blockSize)
         this.cameraX = 0
         this.cameraY = 0
+        this.keys = {a: false, d: false}
+        this.keyEvents()
+    }
+    keyEvents() {
+        document.addEventListener('keydown', function(e) {
+            let key = e.keyCode
+            if(key === 'a') { this.keys.a = true }
+            if(key === 'd') { this.keys.d = true }
+        });
+        document.addEventListener('keyup', function(e) {
+            let key = e.keyCode
+            if(key === 'a') { this.keys.a = false }
+            if(key === 'd') { this.keys.d = false }
+        });
+    }
+    checkMovement() {
+        
     }
     attachCanvasResizeEvent() {
         window.addEventListener('resize', () => {
@@ -21,8 +38,6 @@ class RenderEngine {
             this.windowHeight = window.innerHeight
             this.maxX = parseInt(this.windowWidth / this.blockSize)
             this.resizeCanvas(this.windowWidth, this.windowHeight)
-            // TEST
-            this.render()
         })
         this.resizeCanvas(this.windowWidth, this.windowHeight)
     }
@@ -31,21 +46,27 @@ class RenderEngine {
         this.canvas.height = height
     }
     render() {
-        world.generate(this.minX, this.maxX)
-        for(let i = 0; i < this.world.worldArray[0].length; i ++) {
-            if(this.world.worldArray[0][i + 1] == 0) {
-                this.cameraY = i * this.blockSize;
-                break
+        this.checkMovement()
+        if(this.cameraX > this.world.worldArray.length || this.cameraX === 0) {
+            world.generate(this.minX, this.maxX)
+        }
+        if(this.cameraX === 0) {
+            for(let i = 0; i < this.world.worldArray[0].length; i ++) {
+                if(this.world.worldArray[0][i + 1] == 0) {
+                    this.cameraY = i * this.blockSize;
+                    break
+                }
             }
         }
         this.worldRender(0 , 0, this.maxX, this.worldMaxY )
         this.renderCamera()
+        requestAnimationFrame(this.render.bind(this))
     }
     renderCamera() {
         this.drawBlock(this.cameraX, this.cameraY, this.blockSize, this.blockSize, 'purple')
     }
     worldRender(startX, startY, endX, endY) {
-        console.log(startX, startY, endX, endY)
+        // console.log(startX, startY, endX, endY)
         this.clearCanvas()
         for(let x = startX; x < endX; x ++) { 
             for(let y = startY; y < endY; y ++) {
