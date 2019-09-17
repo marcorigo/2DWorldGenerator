@@ -49,22 +49,3 @@ class World {
         }
     }
 }
-
-
-
-
-
-// blockManager(this, blockId) {
-//     if (blockId == 1)
-//         return 'green'
-//     else if (blockId == 2)
-//         return 'brown'
-//     else if (blockId == 3)
-//         return 'gray'
-//     else if (blockId == 4)
-//         return '#0077be'
-//     else if (blockId == 5)
-//         return '#c2b280'
-//     else
-//         return 'purple'
-// }

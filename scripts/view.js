@@ -15,22 +15,27 @@ class RenderEngine {
         this.scale && this.attachCanvasResizeEvent()
         this.resizeCanvas(this.windowWidth, this.windowHeight)
         if(!blocksize) {
-            this.blocksize = this.windowHeight / this.worldMaxY
+            this.blocksize = parseInt(this.windowHeight / this.worldMaxY)
         }
+        this.maxX = parseInt(this.windowWidth / this.blocksize)
     }
     attachCanvasResizeEvent() {
         window.addEventListener('resize', () => {
             this.windowWidth = window.innerWidth
             this.windowHeight = window.innerHeight
-            this.resizeCanvas( this.windowWidth, this.windowHeight)
+            this.resizeCanvas(this.windowWidth, this.windowHeight)
         })
     }
     resizeCanvas(width, height) {
         this.canvas.width = width
         this.canvas.height = height
     }
-    render(startX, startY, endX, endY) {
-        console.log(this.world.worldArray)
+    render() {
+        world.generate(0, this.maxX)
+        this.worldRender(0, 0, this.maxX, this.worldMaxY)
+    }
+    worldRender(startX, startY, endX, endY) {
+        // console.log(this.world.worldArray)
         this.clearCanvas()
         for(let x = startX; x < endX; x ++) { 
             for(let y = startY; y < endY; y ++) {
@@ -38,7 +43,10 @@ class RenderEngine {
                 if(block != 0) {
                     let color = this.blockManager(block)
                     this.ctx.fillStyle = color;
-                    this.ctx.fillRect (x * this.blocksize ,(endY - startY - y - 1) * this.blocksize , this.blocksize, this.blocksize)
+                    this.ctx.fillRect(x * this.blocksize ,(endY - startY - y - 1) * this.blocksize , this.blocksize, this.blocksize)
+                    this.ctx.lineWidth = 0.2
+                    this.ctx.strokeStyle = 'black'
+                    this.ctx.strokeRect(x * this.blocksize ,(endY - startY - y - 1) * this.blocksize , this.blocksize, this.blocksize)
                 }
             }
         }
