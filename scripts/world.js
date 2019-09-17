@@ -17,17 +17,22 @@ class World {
         this.worldArray.push(blockId)
     }
     generate(startX, endX) {
-        for(let x = startX; x < endX; x ++) {
-            let colHeight = parseInt(this.noiseGen.getNoise(x, this.maxY - this.minY, this.chunkSize, this.noise))
-            let column = []
-            for(let y = this.minY; y < this.maxY; y ++ ) {
-                let blockId = this.blockGenerationManager(y, colHeight)
-                column.push(blockId)
+        if(endX > this.worldArray.length) {
+            startX = this.worldArray.length
+            for(let x = startX; x < endX; x ++) {
+                let colHeight = parseInt(this.noiseGen.getNoise(x, this.maxY - this.minY, this.chunkSize, this.noise))
+                let column = []
+                for(let y = this.minY; y < this.maxY; y ++ ) {
+                    let blockId = this.blockGenerationManager(y, colHeight)
+                    column.push(blockId)
+                }
+                this.saveWorld(column)
             }
-            this.saveWorld(column)
         }
     }
     blockGenerationManager(y, colHeight) {
+        if (y === 0)
+            return  6
         if (y > colHeight && y < this.maxY / 3)
             return 4
         if (y > colHeight)

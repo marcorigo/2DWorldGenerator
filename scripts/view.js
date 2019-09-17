@@ -7,7 +7,7 @@ class RenderEngine {
         this.windowWidth = options.width || window.innerWidth
         this.windowHeight = options.height || window.innerHeight
         this.scale = options.scale || true
-        this.blockSize = options.blockSize || parseInt(this.windowWidth / 100)
+        this.blockSize = options.blockSize || parseInt((this.windowHeight / this.worldMaxY))
         this.skyColor = options.skyColor || 'lightblue'
         this.ctx = canvas.getContext('2d')
         this.scale && this.attachCanvasResizeEvent()
@@ -57,7 +57,7 @@ class RenderEngine {
                                   this.blockSize ,
                                   this.blockSize ,
                                   color)
-                    this.printBlockId(x * this.blockSize , (endY - startY - y - 1) * this.blockSize, block)
+                    // this.printBlockId(x * this.blockSize , (endY - startY - y - 1) * this.blockSize, block)
                 }
             }
         }
@@ -88,6 +88,8 @@ class RenderEngine {
         return '#0077be'
     else if (blockId == 5)
         return '#c2b280'
+    else if (blockId == 6)
+        return 'black'
     else
         return 'purple'
     }
