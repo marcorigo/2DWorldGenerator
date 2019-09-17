@@ -8,3 +8,10 @@ canvas {
     margin: 0;
     padding: 0
 }
+#info {
+    position: absolute;
+    text-align: center;
+    width: 100%;
+    font-size: 1.2em;
+    font-weight: bold
+}
