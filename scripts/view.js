@@ -9,18 +9,19 @@ class RenderEngine {
         this.blockSize = options.blockSize || parseInt((this.windowHeight / 50))
         this.skyColor = options.skyColor || 'lightblue'
         this.ctx = canvas.getContext('2d')
-        this.cameraX = 0
-        this.cameraY = 0
+        // this.cameraX = 0
+        // this.cameraY = 0
         this.minY = 0
         this.maxX = 0
         this.maxY = this.world.maxY
         this.keys = {a: false, d: false, w: false, s: false}
+        this.fpsCounter = {currentSecond: 0, frameCount: 0, framesLastSecond: 0, lastFrameTime: 0}
         this.inizialize()
     }
     inizialize() {
         this.keyEvents(this.keys)
         if(this.scale) {
-            this.resizeWindow(window.innerWidth, window.innerHeight)
+            this.resizeWindow()
             this.attachCanvasResizeEvent()
         }
         this.resizeCanvas()
@@ -50,19 +51,10 @@ class RenderEngine {
     }
     attachCanvasResizeEvent() {
         window.addEventListener('resize', () => {
-            this.resizeWindow(window.innerWidth, window.innerHeight)
+            this.resizeWindow()
             this.blockSize = parseInt((this.windowHeight / 50))
             this.calcViewport()
             this.resizeCanvas()
-            console.log('minX: ' + this.minX +
-                        ' minY: ' + this.minY +
-                        ' maxX: ' + this.maxX +
-                        ' maxY: ' + this.maxY +
-                        ' windowWidth: ' + this.windowWidth +
-                        ' windowHeight: ' + this.windowHeight +
-                        ' blockSize: ' + this.blockSize +
-                        ' canvasWidth: ' + this.canvas.width + 
-                        ' canvasHeight: ' + this.canvas.height)
         })
     }
     calcViewport() {
@@ -78,11 +70,21 @@ class RenderEngine {
         this.canvas.width = this.windowWidth
         this.canvas.height = this.windowHeight
     }
-    resizeWindow(width, height) {
-        this.windowWidth = width
-        this.windowHeight = height
+    resizeWindow() {
+        this.windowWidth = window.innerWidth
+        this.windowHeight = window.innerHeight
     }
     render() {
+        // FPS COUNTER -------
+	    let sec = Math.floor(Date.now()/1000);
+        if(sec!=this.fpsCounter.currentSecond)
+        {
+	    	this.fpsCounter.currentSecond = sec;
+	    	this.fpsCounter.framesLastSecond = this.fpsCounter.frameCount;
+	    	this.fpsCounter.frameCount = 1;
+	    }
+        else { this.fpsCounter.frameCount++; }
+        // --------------------
         this.checkMovement()
         if(this.maxX > this.world.worldArray.length || this.minX === 0) {
             world.generate(this.minX, this.maxX)
@@ -96,12 +98,13 @@ class RenderEngine {
             }
         }
         this.worldRender(this.minX , this.minY, this.maxX, this.maxY )
-        this.renderCamera()
+        // this.renderCamera()
+        this.debugScreen()
         requestAnimationFrame(this.render.bind(this))
     }
-    renderCamera() {
-        this.drawBlock(this.cameraX, this.cameraY, this.blockSize, this.blockSize, 'purple')
-    }
+    // renderCamera() {
+    //     this.drawBlock(this.cameraX, this.cameraY, this.blockSize, this.blockSize, 'purple')
+    // }
     worldRender(startX, startY, endX, endY) {
         this.clearCanvas()
         for(let x = 0; x < endX - startX; x ++) { 
@@ -149,5 +152,17 @@ class RenderEngine {
         return 'black'
     else
         return 'purple'
+    }
+    debugScreen() {
+        document.getElementById('fps').innerText = 'FPS: ' + this.fpsCounter.framesLastSecond
+        document.getElementById('minx').innerText = 'MinX: ' + this.minX
+        document.getElementById('maxx').innerText = 'MaxX: ' + this.maxX
+        document.getElementById('miny').innerText = 'MinY: ' + this.minY
+        document.getElementById('maxy').innerText = 'MaxY: ' + this.maxY
+        document.getElementById('windowwidth').innerText = 'Ww: ' + this.windowWidth
+        document.getElementById('windowheight').innerText = 'Wh: ' + this.windowHeight
+        document.getElementById('canvaswidth').innerText = 'Cw: ' + this.canvas.width
+        document.getElementById('canvasheight').innerText = 'Ch: ' + this.canvas.height
+        document.getElementById('blocksize').innerText = 'BlockSz: ' + this.blockSize
     }
 }

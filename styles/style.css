@@ -14,5 +14,21 @@ canvas {
     text-align: center;
     width: 100%;
     font-size: 1.2em;
-    font-weight: bold
+    font-weight: bold;
+    z-index: 1;
+}
+
+#fps {
+    color: red;
+    font-weight: bold;
+    font-size: 1.2em
+}
+
+#debug {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    z-index: 1;
+    left: 0;
+    top: 0;
 }
