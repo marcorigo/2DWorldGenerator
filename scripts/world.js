@@ -1,23 +1,13 @@
 class World {
-    constructor(chunkSize, noise, maxY = false, seed = false, maxWidth = false) {
-        this.maxWidth = maxWidth
-        this.chunkSize = chunkSize
-        this.noise = noise
-        this.maxY = maxY
-        this.minY = 0
-        this.minX = 0
-        this.seed = seed
-        this.defaultSettingSetter()
+    constructor(options) {
+        this.chunkSize = options.chunkSize || 128
+        this.noise = options.noiseLevel || 0
+        this.maxY = options.maxHeight || 150
+        this.minY = options.minHeight || 0
+        this.minX = options.minWidth || 0
+        this.seed = options.seed || this.generateSeed()
         this.worldArray = []
         this.noiseGen = new PerlinNoise(this.seed)
-    }
-    defaultSettingSetter() {
-        if (!this.seed) {
-            this.seed = this.generateSeed()
-        }
-        if (!this.maxY) {
-            this.maxY = 150
-        }
     }
     generateSeed() {
         return Math.floor(Math.random() * 10000000) + 1000000; 
@@ -26,26 +16,28 @@ class World {
         this.worldArray.push(blockId)
     }
     generate(startX, endX) {
-        for(let i = startX; i < endX; i ++) {
-            let colHeight = parseInt(this.noiseGen.getNoise(i, this.maxY - this.minY, this.chunkSize, this.noise))
-            let col = []
-            for(let j = this.minY; j < this.maxY; j ++ ) {
-                let blockId
-                if (j > colHeight && j < this.maxY / 3)
-                    blockId = 4
-                else if (j > colHeight)
-                    blockId = 0
-                else if (j == colHeight && j < this.maxY / 3 + 1)
-                    blockId = 5
-                else if (j == colHeight)
-                    blockId = 1
-                else if (j > colHeight - 5)
-                    blockId = 2
-                else
-                    blockId = 3
-                col.push(blockId)
+        for(let x = startX; x < endX; x ++) {
+            let colHeight = parseInt(this.noiseGen.getNoise(x, this.maxY - this.minY, this.chunkSize, this.noise))
+            let column = []
+            for(let y = this.minY; y < this.maxY; y ++ ) {
+                let blockId = this.blockGenerationManager(y, colHeight)
+                column.push(blockId)
             }
-            this.saveWorld(col)
+            this.saveWorld(column)
         }
+    }
+    blockGenerationManager(y, colHeight) {
+        if (y > colHeight && y < this.maxY / 3)
+            return 4
+        if (y > colHeight)
+            return  0
+        if (y == colHeight && y < this.maxY / 3 + 1)
+            return  5
+        if (y == colHeight)
+            return  1
+        if (y > colHeight - 5)
+            return  2
+        else
+            return  3
     }
 }
