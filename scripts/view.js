@@ -2,19 +2,20 @@ class RenderEngine {
     constructor(canvas, world, options) {
         this.canvas = canvas
         this.world = world
-        this.worldMaxY = this.world.maxY
         this.minX = this.world.minX
+        this.maxY = 100
+        this.minY = 50
         this.windowWidth = options.width || window.innerWidth
         this.windowHeight = options.height || window.innerHeight
         this.scale = options.scale || true
-        this.blockSize = options.blockSize || parseInt((this.windowHeight / this.worldMaxY))
+        this.blockSize = options.blockSize || parseInt((this.windowHeight / 50))
         this.skyColor = options.skyColor || 'lightblue'
         this.ctx = canvas.getContext('2d')
         this.scale && this.attachCanvasResizeEvent()
         this.maxX = parseInt(this.windowWidth / this.blockSize)
         this.cameraX = 0
         this.cameraY = 0
-        this.keys = {a: false, d: false}
+        this.keys = {a: false, d: false, w: false, s: false}
         this.keyEvents(this.keys)
     }
     keyEvents(keys) {
@@ -22,18 +23,22 @@ class RenderEngine {
             let key = e.keyCode
             if(key === 65) { keys.a = true }
             if(key === 68) { keys.d = true }
+            if(key === 87) { keys.w = true }
+            if(key === 83) { keys.s = true }
         });
         document.addEventListener('keyup', (e) => {
             let key = e.keyCode
             if(key === 65) { keys.a = false }
             if(key === 68) { keys.d = false }
+            if(key === 87) { keys.w = false }
+            if(key === 83) { keys.s = false }
         });
     }
     checkMovement() {
-        // if(this.keys.a && this.cameraX > 0) { this.cameraX -= this.blockSize }
-        // if(this.keys.d) { this.cameraX += this.blockSize }
         if(this.keys.a && this.minX > 0) { this.minX --; this.maxX -- }
         if(this.keys.d) { this.minX ++; this.maxX ++ }
+        if(this.keys.w) { this.minY ++; this.maxY ++ }
+        if(this.keys.s) { this.minY --; this.maxY -- }
     }
     attachCanvasResizeEvent() {
         window.addEventListener('resize', () => {
@@ -49,10 +54,10 @@ class RenderEngine {
         this.canvas.height = height
     }
     render() {
-        // TEST
         this.checkMovement()
         if(this.maxX > this.world.worldArray.length || this.minX === 0) {
             world.generate(this.minX, this.maxX)
+            console.log(this.world.worldArray)
         }
         if(this.cameraX === 0) {
             for(let i = 0; i < this.world.worldArray[0].length; i ++) {
@@ -62,7 +67,7 @@ class RenderEngine {
                 }
             }
         }
-        this.worldRender(this.minX , 0, this.maxX, this.worldMaxY )
+        this.worldRender(this.minX , this.minY, this.maxX, this.maxY )
         this.renderCamera()
         requestAnimationFrame(this.render.bind(this))
     }
@@ -70,7 +75,6 @@ class RenderEngine {
         this.drawBlock(this.cameraX, this.cameraY, this.blockSize, this.blockSize, 'purple')
     }
     worldRender(startX, startY, endX, endY) {
-        // console.log(startX, startY, endX, endY)
         this.clearCanvas()
         for(let x = 0; x < endX - startX; x ++) { 
             for(let y = 0; y < endY - startY; y ++) {
