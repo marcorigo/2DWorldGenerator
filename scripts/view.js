@@ -71,6 +71,8 @@ class RenderEngine {
         this.maxY = parseInt(halfWorldHeight + blocksOnHeight / 2)
         this.minY = parseInt(halfWorldHeight - blocksOnHeight / 2)
         this.maxX = parseInt(this.windowWidth / this.blockSize)
+        // TEST
+        this.minX = 0
     }
     resizeCanvas() {
         this.canvas.width = this.windowWidth
