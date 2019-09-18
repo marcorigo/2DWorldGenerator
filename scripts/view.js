@@ -2,7 +2,6 @@ class RenderEngine {
     constructor(canvas, world, options) {
         this.canvas = canvas
         this.world = world
-        this.minX = this.world.minX
         this.windowWidth = options.width || window.innerWidth * window.devicePixelRatio
         this.windowHeight = options.height || window.innerHeight * window.devicePixelRatio
         this.scale = options.scale
@@ -11,11 +10,12 @@ class RenderEngine {
         this.ctx = canvas.getContext('2d')
         // this.cameraX = 0
         // this.cameraY = 0
+        this.minX = this.world.minX
         this.minY = 0
         this.maxX = 0
         this.maxY = this.world.maxY
         this.keys = {a: false, d: false, w: false, s: false}
-        this.fpsCounter = {currentSecond: 0, frameCount: 0, framesLastSecond: 0, lastFrameTime: 0}
+        this.fpsCounter = new FpsCounter()
         this.inizialize()
     }
     inizialize() {
@@ -76,16 +76,7 @@ class RenderEngine {
         this.windowHeight = window.innerHeight * window.devicePixelRatio
     }
     render() {
-        // FPS COUNTER -------
-	    let sec = Math.floor(Date.now()/1000);
-        if(sec!=this.fpsCounter.currentSecond)
-        {
-	    	this.fpsCounter.currentSecond = sec;
-	    	this.fpsCounter.framesLastSecond = this.fpsCounter.frameCount;
-	    	this.fpsCounter.frameCount = 1;
-	    }
-        else { this.fpsCounter.frameCount++; }
-        // --------------------
+        this.fpsCounter.go()
         this.checkMovement()
         if(this.maxX > this.world.worldArray.length || this.minX === 0) {
             world.generate(this.minX, this.maxX)
@@ -155,7 +146,7 @@ class RenderEngine {
         return 'purple'
     }
     debugScreen() {
-        document.getElementById('fps').innerText = 'FPS: ' + this.fpsCounter.framesLastSecond
+        document.getElementById('fps').innerText = 'FPS: ' + this.fpsCounter.value()
         document.getElementById('minx').innerText = 'MinX: ' + this.minX
         document.getElementById('maxx').innerText = 'MaxX: ' + this.maxX
         document.getElementById('miny').innerText = 'MinY: ' + this.minY
