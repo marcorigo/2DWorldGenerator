@@ -3,8 +3,8 @@ class RenderEngine {
         this.canvas = canvas
         this.world = world
         this.minX = this.world.minX
-        this.windowWidth = options.width || window.innerWidth
-        this.windowHeight = options.height || window.innerHeight
+        this.windowWidth = options.width || window.innerWidth * window.devicePixelRatio
+        this.windowHeight = options.height || window.innerHeight * window.devicePixelRatio
         this.scale = options.scale
         this.blockSize = options.blockSize || parseInt((this.windowHeight / 50))
         this.skyColor = options.skyColor || 'lightblue'
@@ -23,6 +23,7 @@ class RenderEngine {
         if(this.scale) {
             this.resizeWindow()
             this.attachCanvasResizeEvent()
+            document.getElementById('canvas').style.width = '100%'
         }
         this.resizeCanvas()
         this.calcViewport()
@@ -53,8 +54,8 @@ class RenderEngine {
         window.addEventListener('resize', () => {
             this.resizeWindow()
             this.blockSize = parseInt((this.windowHeight / 50))
-            this.calcViewport()
             this.resizeCanvas()
+            this.calcViewport()
         })
     }
     calcViewport() {
@@ -71,8 +72,8 @@ class RenderEngine {
         this.canvas.height = this.windowHeight
     }
     resizeWindow() {
-        this.windowWidth = window.innerWidth
-        this.windowHeight = window.innerHeight
+        this.windowWidth = window.innerWidth * window.devicePixelRatio
+        this.windowHeight = window.innerHeight * window.devicePixelRatio
     }
     render() {
         // FPS COUNTER -------
@@ -89,14 +90,14 @@ class RenderEngine {
         if(this.maxX > this.world.worldArray.length || this.minX === 0) {
             world.generate(this.minX, this.maxX)
         }
-        if(this.cameraX === 0) {
-            for(let i = 0; i < this.world.worldArray[0].length; i ++) {
-                if(this.world.worldArray[0][i + 1] == 0) {
-                    this.cameraY = i * this.blockSize;
-                    break
-                }
-            }
-        }
+        // if(this.cameraX === 0) {
+        //     for(let i = 0; i < this.world.worldArray[0].length; i ++) {
+        //         if(this.world.worldArray[0][i + 1] == 0) {
+        //             this.cameraY = i * this.blockSize;
+        //             break
+        //         }
+        //     }
+        // }
         this.worldRender(this.minX , this.minY, this.maxX, this.maxY )
         // this.renderCamera()
         this.debugScreen()
