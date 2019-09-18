@@ -19,6 +19,7 @@ class World {
     generate(startX, endX) {
         if(endX > this.worldArray.length) {
             startX = this.worldArray.length
+            endX += this.chunkSize
             for(let x = startX; x < endX; x ++) {
                 let colHeight = parseInt(this.noiseGen.getNoise(x, this.maxY - this.minY, this.chunkSize, this.noise))
                 let column = []

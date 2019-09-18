@@ -156,5 +156,6 @@ class RenderEngine {
         document.getElementById('canvaswidth').innerText = 'Cw: ' + this.canvas.width
         document.getElementById('canvasheight').innerText = 'Ch: ' + this.canvas.height
         document.getElementById('blocksize').innerText = 'BlockSz: ' + this.blockSize
+        document.getElementById('worldlength').innerText = 'WorldLength: ' + this.world.worldArray.length
     }
 }
