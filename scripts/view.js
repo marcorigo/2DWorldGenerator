@@ -14,6 +14,9 @@ class RenderEngine {
         this.minX = this.world.minX
         this.minY = 0
         this.maxX = 0
+        this.posX = 500
+        this.posY = 0
+        this.viewport = {}
         this.maxY = this.world.maxY
         this.keys = new Controls()
         this.fpsCounter = new FpsCounter()
@@ -27,11 +30,19 @@ class RenderEngine {
         }
         this.resCanv()
     }
+    clamp(n, lo, hi) {
+        // console.log(n < lo ? lo : n > hi ? hi : n)
+        return n < lo ? lo : n > hi ? hi : n
+    }
     checkMovement() {
-        if(this.keys.get(65) && this.minX > 0) { this.minX --; this.maxX -- }
-        if(this.keys.get(68)) { this.minX ++; this.maxX ++ }
-        if(this.keys.get(87)) { this.minY ++; this.maxY ++ }
-        if(this.keys.get(83)) { this.minY --; this.maxY -- }
+        // if(this.keys.get(65) && this.minX > 0) { this.minX --; this.maxX -- }
+        // if(this.keys.get(68)) { this.minX ++; this.maxX ++ }
+        // if(this.keys.get(87)) { this.minY ++; this.maxY ++ }
+        // if(this.keys.get(83)) { this.minY --; this.maxY -- }
+        if(this.keys.get(65)) { this.posX -= 5 }
+        if(this.keys.get(68)) { this.posX += 5 }
+        if(this.keys.get(87)) { this.posY -= 5 }
+        if(this.keys.get(83)) { this.posY += 5 }
     }
     resCanv() {
         if(this.scale) {
@@ -50,7 +61,7 @@ class RenderEngine {
         this.maxY = parseInt(halfWorldHeight + blocksOnHeight / 2)
         // Adding +1 and -1 to not leave empty blocks because of parsing
         this.minY = parseInt(halfWorldHeight - blocksOnHeight / 2) - 1
-        this.maxX = parseInt(this.windowWidth / this.blockSize) + 1 + this.minX
+        // this.maxX = parseInt(this.windowWidth / this.blockSize) + 1 + this.minX
     }
     resizeCanvas() {
         this.canvas.width = this.windowWidth * this.pixelRatio
@@ -70,24 +81,45 @@ class RenderEngine {
         this.windowHeight = parseInt(window.innerHeight)
     }
     render() {
+        this.viewport.x = this.clamp(
+            -this.posX + this.canvas.width / 2, 
+          this.canvas.width - 1000 * this.blockSize, 0
+        );
+    
+        this.viewport.y = this.clamp(
+            -this.posY + this.canvas.height / 2, 
+          this.canvas.height - 150 * this.blockSize, 0
+        ); 
+        this.minX = Math.ceil(this.viewport.x / this.blockSize) * -1
+        this.maxX = Math.ceil((this.canvas.width - this.viewport.x) / this.blockSize) + 1
+        // this.minY = Math.ceil((this.viewport.y / this.blockSize) * -1)
+        // this.maxY = Math.ceil((this.canvas.height - this.viewport.y) / this.blockSize) + 1
+
         this.fpsCounter.go()
         this.checkMovement()
         if(this.maxX > this.world.worldArray.length || this.minX === 0) {
             world.generate(this.minX, this.maxX)
         }
+        this.clearCanvas()
+        this.ctx.save()
+        this.ctx.translate(this.viewport.x % this.blockSize, 0)
         this.worldRender(this.minX , this.minY, this.maxX, this.maxY )
+        this.ctx.restore()
         // this.renderCamera()
         this.debugScreen()
+        // this.drawBlock(this.posX, this.posY, 10, 10, 'red')
+        this.ctx.fillStyle = 'red';
+        this.ctx.fillRect(this.posX + this.viewport.x, this.posY + this.viewport.y, 10, 10)
+
         requestAnimationFrame(this.render.bind(this))
     }
     worldRender(startX, startY, endX, endY) {
-        this.clearCanvas()
         for(let x = 0; x < endX - startX; x ++) { 
             for(let y = 0; y < endY - startY; y ++) {
                 let block = this.world.worldArray[x + startX][y + startY]
                 if(block != 0) {
                     let color = this.blockManager(block)
-                    this.drawBlock(x * this.blockSize ,
+                    this.drawBlock(x * this.blockSize - (this.posX - parseInt(this.posX)) ,
                                   (endY - startY - y - 1) * this.blockSize ,
                                   this.blockSize ,
                                   this.blockSize ,
@@ -102,10 +134,10 @@ class RenderEngine {
     }
     drawBlock(x, y, width, height, color) {
         this.ctx.fillStyle = color;
-        this.ctx.fillRect(x ,y , width, height)
+        this.ctx.fillRect(x, y , width, height)
         this.ctx.lineWidth = 0.2
         this.ctx.strokeStyle = 'black'
-        this.ctx.strokeRect(x ,y , width, height)
+        this.ctx.strokeRect(x, y , width, height)
     }
     printBlockId(x, y, block) {
         this.ctx.fillStyle = 'black'
@@ -140,6 +172,7 @@ class RenderEngine {
         document.getElementById('canvaswidth').innerText = 'Cw: ' + this.canvas.width
         document.getElementById('canvasheight').innerText = 'Ch: ' + this.canvas.height
         document.getElementById('blocksize').innerText = 'BlockSz: ' + this.blockSize
+        document.getElementById('test').innerText = 'test: ' + this.test
         document.getElementById('worldlength').innerText = 'WorldLength: ' + this.world.worldArray.length
     }
 }
