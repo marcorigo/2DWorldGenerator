@@ -25,11 +25,15 @@ canvas {
     font-size: 1.2em
 }
 
+#debug code {
+    line-height: 1em
+}
+
 #debug {
     position: absolute;
     display: flex;
     flex-direction: column;
     z-index: 1;
-    left: 0;
-    top: 0;
+    left: 1px;
+    top: 1px;
 }

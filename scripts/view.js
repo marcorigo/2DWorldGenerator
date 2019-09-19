@@ -2,6 +2,7 @@ class RenderEngine {
     constructor(canvas, world, options) {
         this.canvas = canvas
         this.world = world
+        this.options = options
         this.pixelRatio = window.devicePixelRatio || 1
         this.blocksInHeight = options.blocksInHeight || 50
         this.windowWidth = options.width || window.innerWidth 
@@ -14,18 +15,11 @@ class RenderEngine {
         this.minY = 0
         this.maxX = 0
         this.maxY = this.world.maxY
-        this.keys = {a: false, d: false, w: false, s: false}
+        this.keys = new Controls()
         this.fpsCounter = new FpsCounter()
-        // console.log(this.ctx.msBackingStorePixelRatio ,
-        //     this.ctx.webkitBackingStorePixelRatio ,
-        //     this.ctx.mozBackingStorePixelRatio ,
-        //     this.ctx.oBackingStorePixelRatio ,
-        //     this.ctx.backingStorePixelRatio , 
-        //     this.ctx.msBackingStorePixelRatio)
         this.inizialize()
     }
     inizialize() {
-        this.keyEvents(this.keys)
         if(this.scale) {
             window.addEventListener('resize', () => { this.resCanv() })
             document.getElementById('canvas').style.width = '100%'
@@ -33,38 +27,22 @@ class RenderEngine {
         }
         this.resCanv()
     }
-    keyEvents(keys) {
-        document.addEventListener('keydown', (e) => {
-            let key = e.keyCode
-            if(key === 65) { keys.a = true }
-            if(key === 68) { keys.d = true }
-            if(key === 87) { keys.w = true }
-            if(key === 83) { keys.s = true }
-        });
-        document.addEventListener('keyup', (e) => {
-            let key = e.keyCode
-            if(key === 65) { keys.a = false }
-            if(key === 68) { keys.d = false }
-            if(key === 87) { keys.w = false }
-            if(key === 83) { keys.s = false }
-        });
-    }
     checkMovement() {
-        if(this.keys.a && this.minX > 0) { this.minX --; this.maxX -- }
-        if(this.keys.d) { this.minX ++; this.maxX ++ }
-        if(this.keys.w) { this.minY ++; this.maxY ++ }
-        if(this.keys.s) { this.minY --; this.maxY -- }
+        if(this.keys.get(65) && this.minX > 0) { this.minX --; this.maxX -- }
+        if(this.keys.get(68)) { this.minX ++; this.maxX ++ }
+        if(this.keys.get(87)) { this.minY ++; this.maxY ++ }
+        if(this.keys.get(83)) { this.minY --; this.maxY -- }
     }
     resCanv() {
         if(this.scale) {
-            this.resizeWindow()
+            this.updateWindowSettings()
             this.updateBlockSize()
         }
         this.resizeCanvas()
         this.calcViewport()
     }
     updateBlockSize() {
-        this.blockSize = parseInt((this.windowHeight /  this.blocksInHeight))
+        this.blockSize = this.options.blockSize || parseInt((this.windowHeight /  this.blocksInHeight))
     }
     calcViewport() {
         let blocksOnHeight = parseInt((this.windowHeight / this.blockSize))
@@ -72,9 +50,7 @@ class RenderEngine {
         this.maxY = parseInt(halfWorldHeight + blocksOnHeight / 2)
         // Adding +1 and -1 to not leave empty blocks because of parsing
         this.minY = parseInt(halfWorldHeight - blocksOnHeight / 2) - 1
-        this.maxX = parseInt(this.windowWidth / this.blockSize) + 1
-        // TEST
-        this.minX = 0
+        this.maxX = parseInt(this.windowWidth / this.blockSize) + 1 + this.minX
     }
     resizeCanvas() {
         this.canvas.width = this.windowWidth * this.pixelRatio
@@ -82,9 +58,14 @@ class RenderEngine {
         this.ctx.scale(this.pixelRatio, this.pixelRatio)
         // this.ctx.setTransform(this.pixelRatio,0,0,this.pixelRatio,0,0);
     }
-    resizeWindow() {
-        // TEST
-        this.pixelRatio = window.devicePixelRatio
+    updateWindowSettings() {
+        let backingStore = this.ctx.msBackingStorePixelRatio ||
+            this.ctx.webkitBackingStorePixelRatio ||
+            this.ctx.mozBackingStorePixelRatio ||
+            this.ctx.oBackingStorePixelRatio ||
+            this.ctx.backingStorePixelRatio || 
+            this.ctx.msBackingStorePixelRatio || 1
+        this.pixelRatio = (window.devicePixelRatio || 1) / backingStore
         this.windowWidth = parseInt(window.innerWidth)
         this.windowHeight = parseInt(window.innerHeight)
     }
@@ -143,9 +124,9 @@ class RenderEngine {
     else if (blockId == 5)
         return '#c2b280'
     else if (blockId == 6)
-        return 'black'
+        return '#606060'
     else
-        return 'purple'
+        return 'black'
     }
     debugScreen() {
         document.getElementById('fps').innerText = 'FPS: ' + this.fpsCounter.value()
