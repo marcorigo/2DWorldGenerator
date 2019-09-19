@@ -2,31 +2,36 @@ class RenderEngine {
     constructor(canvas, world, options) {
         this.canvas = canvas
         this.world = world
-        this.windowWidth = options.width || window.innerWidth * window.devicePixelRatio
-        this.windowHeight = options.height || window.innerHeight * window.devicePixelRatio
+        this.pixelRatio = window.devicePixelRatio || 1
+        this.blocksInHeight = options.blocksInHeight || 50
+        this.windowWidth = options.width || window.innerWidth 
+        this.windowHeight = options.height || window.innerHeight 
         this.scale = options.scale
-        this.blockSize = options.blockSize || parseInt((this.windowHeight / 50))
+        this.blockSize = options.blockSize || parseInt((this.windowHeight /  this.blocksInHeight))
         this.skyColor = options.skyColor || 'lightblue'
         this.ctx = canvas.getContext('2d')
-        // this.cameraX = 0
-        // this.cameraY = 0
         this.minX = this.world.minX
         this.minY = 0
         this.maxX = 0
         this.maxY = this.world.maxY
         this.keys = {a: false, d: false, w: false, s: false}
         this.fpsCounter = new FpsCounter()
+        // console.log(this.ctx.msBackingStorePixelRatio ,
+        //     this.ctx.webkitBackingStorePixelRatio ,
+        //     this.ctx.mozBackingStorePixelRatio ,
+        //     this.ctx.oBackingStorePixelRatio ,
+        //     this.ctx.backingStorePixelRatio , 
+        //     this.ctx.msBackingStorePixelRatio)
         this.inizialize()
     }
     inizialize() {
         this.keyEvents(this.keys)
         if(this.scale) {
-            this.resizeWindow()
-            this.attachCanvasResizeEvent()
+            window.addEventListener('resize', () => { this.resCanv() })
             document.getElementById('canvas').style.width = '100%'
+            document.getElementById('canvas').style.height = '100vh'
         }
-        this.resizeCanvas()
-        this.calcViewport()
+        this.resCanv()
     }
     keyEvents(keys) {
         document.addEventListener('keydown', (e) => {
@@ -50,30 +55,38 @@ class RenderEngine {
         if(this.keys.w) { this.minY ++; this.maxY ++ }
         if(this.keys.s) { this.minY --; this.maxY -- }
     }
-    attachCanvasResizeEvent() {
-        window.addEventListener('resize', () => {
+    resCanv() {
+        if(this.scale) {
             this.resizeWindow()
-            this.blockSize = parseInt((this.windowHeight / 50))
-            this.resizeCanvas()
-            this.calcViewport()
-        })
+            this.updateBlockSize()
+        }
+        this.resizeCanvas()
+        this.calcViewport()
+    }
+    updateBlockSize() {
+        this.blockSize = parseInt((this.windowHeight /  this.blocksInHeight))
     }
     calcViewport() {
-        let blocksOnHeight = parseInt(this.windowHeight / this.blockSize)
+        let blocksOnHeight = parseInt((this.windowHeight / this.blockSize))
         let halfWorldHeight = parseInt(this.world.maxY / 2)
         this.maxY = parseInt(halfWorldHeight + blocksOnHeight / 2)
-        this.minY = parseInt(halfWorldHeight - blocksOnHeight / 2)
-        this.maxX = parseInt(this.windowWidth / this.blockSize)
+        // Adding +1 and -1 to not leave empty blocks because of parsing
+        this.minY = parseInt(halfWorldHeight - blocksOnHeight / 2) - 1
+        this.maxX = parseInt(this.windowWidth / this.blockSize) + 1
         // TEST
         this.minX = 0
     }
     resizeCanvas() {
-        this.canvas.width = this.windowWidth
-        this.canvas.height = this.windowHeight
+        this.canvas.width = this.windowWidth * this.pixelRatio
+        this.canvas.height = this.windowHeight * this.pixelRatio
+        this.ctx.scale(this.pixelRatio, this.pixelRatio)
+        // this.ctx.setTransform(this.pixelRatio,0,0,this.pixelRatio,0,0);
     }
     resizeWindow() {
-        this.windowWidth = window.innerWidth * window.devicePixelRatio
-        this.windowHeight = window.innerHeight * window.devicePixelRatio
+        // TEST
+        this.pixelRatio = window.devicePixelRatio
+        this.windowWidth = parseInt(window.innerWidth)
+        this.windowHeight = parseInt(window.innerHeight)
     }
     render() {
         this.fpsCounter.go()
@@ -81,22 +94,11 @@ class RenderEngine {
         if(this.maxX > this.world.worldArray.length || this.minX === 0) {
             world.generate(this.minX, this.maxX)
         }
-        // if(this.cameraX === 0) {
-        //     for(let i = 0; i < this.world.worldArray[0].length; i ++) {
-        //         if(this.world.worldArray[0][i + 1] == 0) {
-        //             this.cameraY = i * this.blockSize;
-        //             break
-        //         }
-        //     }
-        // }
         this.worldRender(this.minX , this.minY, this.maxX, this.maxY )
         // this.renderCamera()
         this.debugScreen()
         requestAnimationFrame(this.render.bind(this))
     }
-    // renderCamera() {
-    //     this.drawBlock(this.cameraX, this.cameraY, this.blockSize, this.blockSize, 'purple')
-    // }
     worldRender(startX, startY, endX, endY) {
         this.clearCanvas()
         for(let x = 0; x < endX - startX; x ++) { 
@@ -109,7 +111,7 @@ class RenderEngine {
                                   this.blockSize ,
                                   this.blockSize ,
                                   color)
-                    // this.printBlockId(x * this.blockSize , (endY - startY - y - 1) * this.blockSize, block)
+                    // this.printBlockId(x * this.blockSize , (endY - startY - y - 1) * this.blockSize, x)
                 }
             }
         }
@@ -153,6 +155,7 @@ class RenderEngine {
         document.getElementById('maxy').innerText = 'MaxY: ' + this.maxY
         document.getElementById('windowwidth').innerText = 'Ww: ' + this.windowWidth
         document.getElementById('windowheight').innerText = 'Wh: ' + this.windowHeight
+        document.getElementById('pixelratio').innerText = 'PixelRT: ' + this.pixelRatio
         document.getElementById('canvaswidth').innerText = 'Cw: ' + this.canvas.width
         document.getElementById('canvasheight').innerText = 'Ch: ' + this.canvas.height
         document.getElementById('blocksize').innerText = 'BlockSz: ' + this.blockSize
