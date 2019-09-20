@@ -58,9 +58,9 @@ class RenderEngine {
     calcViewport() {
         let blocksOnHeight = parseInt((this.windowHeight / this.blockSize))
         let halfWorldHeight = parseInt(this.world.maxY / 2)
-        this.maxY = parseInt(halfWorldHeight + blocksOnHeight / 2)
+        this.maxY = 150
         // Adding +1 and -1 to not leave empty blocks because of parsing
-        this.minY = parseInt(halfWorldHeight - blocksOnHeight / 2) - 1
+        this.minY = 100
         // this.maxX = parseInt(this.windowWidth / this.blockSize) + 1 + this.minX
     }
     resizeCanvas() {
@@ -92,8 +92,8 @@ class RenderEngine {
         ); 
         this.minX = Math.ceil(this.viewport.x / this.blockSize) * -1
         this.maxX = Math.ceil((this.canvas.width - this.viewport.x) / this.blockSize) + 1
-        // this.minY = Math.ceil((this.viewport.y / this.blockSize) * -1)
-        // this.maxY = Math.ceil((this.canvas.height - this.viewport.y) / this.blockSize) + 1
+        this.maxY = Math.ceil(150 + this.viewport.y / this.blockSize)
+        this.minY = Math.ceil(((this.canvas.height - this.viewport.y) / this.blockSize)) * - 1 + 150
 
         this.fpsCounter.go()
         this.checkMovement()
@@ -101,11 +101,12 @@ class RenderEngine {
             world.generate(this.minX, this.maxX)
         }
         this.clearCanvas()
+
         this.ctx.save()
-        this.ctx.translate(this.viewport.x % this.blockSize, 0)
+        this.ctx.translate(this.viewport.x % this.blockSize, this.viewport.y % this.blockSize)
         this.worldRender(this.minX , this.minY, this.maxX, this.maxY )
         this.ctx.restore()
-        // this.renderCamera()
+
         this.debugScreen()
         // this.drawBlock(this.posX, this.posY, 10, 10, 'red')
         this.ctx.fillStyle = 'red';
@@ -158,7 +159,7 @@ class RenderEngine {
     else if (blockId == 6)
         return '#606060'
     else
-        return 'black'
+        return 'white'
     }
     debugScreen() {
         document.getElementById('fps').innerText = 'FPS: ' + this.fpsCounter.value()
