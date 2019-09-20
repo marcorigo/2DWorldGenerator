@@ -34,10 +34,11 @@ class RenderEngine {
         return n < lo ? lo : n > hi ? hi : n
     }
     checkMovement() {
-        if(this.keys.get(65)) { this.posX -= 5 }
-        if(this.keys.get(68)) { this.posX += 5 }
-        if(this.keys.get(87)) { this.posY -= 5 }
-        if(this.keys.get(83)) { this.posY += 5 }
+        let speed = 3
+        if(this.keys.get(65) && this.posX - speed >= 0) { this.posX -= speed }
+        if(this.keys.get(68)) { this.posX += speed }
+        if(this.keys.get(87) && this.posY - speed >= 0) { this.posY -= speed }
+        if(this.keys.get(83) && this.posY + speed + this.blockSize <= this.world.maxY * this.blockSize) { this.posY += speed }
     }
     resCanv() {
         if(this.scale) {
@@ -48,22 +49,30 @@ class RenderEngine {
         this.calcViewport()
     }
     updateBlockSize() {
+        // GET THE OLD SIZE FOR MOVING CAMERA WITH THE RESIZE
+        let oldBlockSize = this.blockSize
         this.blockSize = this.options.blockSize || parseInt((this.windowHeight /  this.blocksInHeight))
+        // ROUND UP BECAUSE OF JS STRANGE ROUNDING
+        this.posX = Math.ceil(this.posX * (this.blockSize / oldBlockSize))
+        this.posY = Math.ceil(this.posY * (this.blockSize / oldBlockSize))
+
     }
     calcViewport() {
+        // NaN Because X axe has no end
+        // this.windowWidth/height because canvas.width/height is upscaled
         this.viewport.x = this.clamp(
-            -this.posX + (this.canvas.width / this.pixelRatio) / 2, 
+            -this.posX + parseInt(this.windowWidth / 2), 
           NaN, 0
         );
     
         this.viewport.y = this.clamp(
-            -this.posY + (this.canvas.height / this.pixelRatio) / 2, 
-          this.canvas.height - 150 * this.blockSize, 0
+            -this.posY + parseInt(this.windowHeight / 2), 
+            this.windowHeight - (150 * this.blockSize), 0
         ); 
         this.minX = Math.ceil(this.viewport.x / this.blockSize) * -1
-        this.maxX = Math.ceil((this.canvas.width - this.viewport.x) / this.blockSize) + 1
-        this.maxY = Math.ceil(150 + this.viewport.y / this.blockSize)
-        this.minY = Math.ceil(((this.canvas.height - this.viewport.y) / this.blockSize)) * - 1 + 150
+        this.maxX = Math.ceil((this.windowWidth - this.viewport.x) / this.blockSize) + 1
+        this.maxY = Math.ceil(this.world.maxY + this.viewport.y / this.blockSize)
+        this.minY = Math.ceil(((this.windowHeight - this.viewport.y) / this.blockSize)) * - 1 + this.world.maxY
     }
     resizeCanvas() {
         this.canvas.width = this.windowWidth * this.pixelRatio
@@ -100,7 +109,7 @@ class RenderEngine {
         this.worldRender(this.minX , this.minY, this.maxX, this.maxY )
         this.ctx.restore()
 
-        this.drawBlock(this.posX + this.viewport.x, this.posY + this.viewport.y, 10, 10, 'red')
+        this.drawBlock(this.posX + this.viewport.x, this.posY + this.viewport.y, this.blockSize, this.blockSize, 'red')
 
         requestAnimationFrame(this.render.bind(this))
     }
