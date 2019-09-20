@@ -12,7 +12,7 @@ class RenderEngine {
         this.skyColor = options.skyColor || 'lightblue'
         this.ctx = canvas.getContext('2d')
         this.minX = this.world.minX
-        this.minY = 0
+        this.minY = 100
         this.maxX = 0
         this.posX = 500
         this.posY = 0
@@ -31,14 +31,9 @@ class RenderEngine {
         this.resCanv()
     }
     clamp(n, lo, hi) {
-        // console.log(n < lo ? lo : n > hi ? hi : n)
         return n < lo ? lo : n > hi ? hi : n
     }
     checkMovement() {
-        // if(this.keys.get(65) && this.minX > 0) { this.minX --; this.maxX -- }
-        // if(this.keys.get(68)) { this.minX ++; this.maxX ++ }
-        // if(this.keys.get(87)) { this.minY ++; this.maxY ++ }
-        // if(this.keys.get(83)) { this.minY --; this.maxY -- }
         if(this.keys.get(65)) { this.posX -= 5 }
         if(this.keys.get(68)) { this.posX += 5 }
         if(this.keys.get(87)) { this.posY -= 5 }
@@ -56,20 +51,27 @@ class RenderEngine {
         this.blockSize = this.options.blockSize || parseInt((this.windowHeight /  this.blocksInHeight))
     }
     calcViewport() {
-        let blocksOnHeight = parseInt((this.windowHeight / this.blockSize))
-        let halfWorldHeight = parseInt(this.world.maxY / 2)
-        this.maxY = 150
-        // Adding +1 and -1 to not leave empty blocks because of parsing
-        this.minY = 100
-        // this.maxX = parseInt(this.windowWidth / this.blockSize) + 1 + this.minX
+        this.viewport.x = this.clamp(
+            -this.posX + (this.canvas.width / this.pixelRatio) / 2, 
+          NaN, 0
+        );
+    
+        this.viewport.y = this.clamp(
+            -this.posY + (this.canvas.height / this.pixelRatio) / 2, 
+          this.canvas.height - 150 * this.blockSize, 0
+        ); 
+        this.minX = Math.ceil(this.viewport.x / this.blockSize) * -1
+        this.maxX = Math.ceil((this.canvas.width - this.viewport.x) / this.blockSize) + 1
+        this.maxY = Math.ceil(150 + this.viewport.y / this.blockSize)
+        this.minY = Math.ceil(((this.canvas.height - this.viewport.y) / this.blockSize)) * - 1 + 150
     }
     resizeCanvas() {
         this.canvas.width = this.windowWidth * this.pixelRatio
         this.canvas.height = this.windowHeight * this.pixelRatio
         this.ctx.scale(this.pixelRatio, this.pixelRatio)
-        // this.ctx.setTransform(this.pixelRatio,0,0,this.pixelRatio,0,0);
     }
     updateWindowSettings() {
+        // USING DEVICE PIXEL RATIO FOR HIGH RES CANVAS
         let backingStore = this.ctx.msBackingStorePixelRatio ||
             this.ctx.webkitBackingStorePixelRatio ||
             this.ctx.mozBackingStorePixelRatio ||
@@ -81,36 +83,24 @@ class RenderEngine {
         this.windowHeight = parseInt(window.innerHeight)
     }
     render() {
-        this.viewport.x = this.clamp(
-            -this.posX + this.canvas.width / 2, 
-          this.canvas.width - 1000 * this.blockSize, 0
-        );
-    
-        this.viewport.y = this.clamp(
-            -this.posY + this.canvas.height / 2, 
-          this.canvas.height - 150 * this.blockSize, 0
-        ); 
-        this.minX = Math.ceil(this.viewport.x / this.blockSize) * -1
-        this.maxX = Math.ceil((this.canvas.width - this.viewport.x) / this.blockSize) + 1
-        this.maxY = Math.ceil(150 + this.viewport.y / this.blockSize)
-        this.minY = Math.ceil(((this.canvas.height - this.viewport.y) / this.blockSize)) * - 1 + 150
-
+        this.calcViewport()
         this.fpsCounter.go()
         this.checkMovement()
-        if(this.maxX > this.world.worldArray.length || this.minX === 0) {
+        if(this.maxX >= this.world.worldArray.length) {
             world.generate(this.minX, this.maxX)
         }
+        // UPDATE DEBUG INFO
+        this.debugScreen()
+
         this.clearCanvas()
 
+        // MOVING CANVAS FOR FLUIDs MOVEMENT 
         this.ctx.save()
         this.ctx.translate(this.viewport.x % this.blockSize, this.viewport.y % this.blockSize)
         this.worldRender(this.minX , this.minY, this.maxX, this.maxY )
         this.ctx.restore()
 
-        this.debugScreen()
-        // this.drawBlock(this.posX, this.posY, 10, 10, 'red')
-        this.ctx.fillStyle = 'red';
-        this.ctx.fillRect(this.posX + this.viewport.x, this.posY + this.viewport.y, 10, 10)
+        this.drawBlock(this.posX + this.viewport.x, this.posY + this.viewport.y, 10, 10, 'red')
 
         requestAnimationFrame(this.render.bind(this))
     }
@@ -125,7 +115,7 @@ class RenderEngine {
                                   this.blockSize ,
                                   this.blockSize ,
                                   color)
-                    // this.printBlockId(x * this.blockSize , (endY - startY - y - 1) * this.blockSize, x)
+                    // this.printBlockId(x * this.blockSize , (endY - startY - y - 1) * this.blockSize, y)
                 }
             }
         }
@@ -159,7 +149,7 @@ class RenderEngine {
     else if (blockId == 6)
         return '#606060'
     else
-        return 'white'
+        return 'black'
     }
     debugScreen() {
         document.getElementById('fps').innerText = 'FPS: ' + this.fpsCounter.value()
@@ -173,7 +163,10 @@ class RenderEngine {
         document.getElementById('canvaswidth').innerText = 'Cw: ' + this.canvas.width
         document.getElementById('canvasheight').innerText = 'Ch: ' + this.canvas.height
         document.getElementById('blocksize').innerText = 'BlockSz: ' + this.blockSize
-        document.getElementById('test').innerText = 'test: ' + this.test
+        document.getElementById('posx').innerText = 'PosX: ' + this.posX
+        document.getElementById('posy').innerText = 'PosY: ' + this.posY
+        document.getElementById('viewportx').innerText = 'Vx: ' + this.viewport.x
+        document.getElementById('viewporty').innerText = 'Vy: ' + this.viewport.y
         document.getElementById('worldlength').innerText = 'WorldLength: ' + this.world.worldArray.length
     }
 }
