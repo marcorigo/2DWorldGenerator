@@ -14,8 +14,8 @@ class RenderEngine {
         this.minX = this.world.minX
         this.minY = 100
         this.maxX = 0
-        this.posX = 500
-        this.posY = 0
+        this.posX = 0
+        this.posY = this.blockSize * this.world.maxY / 2
         this.viewport = {}
         this.maxY = this.world.maxY
         this.keys = new Controls()
@@ -34,7 +34,7 @@ class RenderEngine {
         return n < lo ? lo : n > hi ? hi : n
     }
     checkMovement() {
-        let speed = 3
+        let speed = 5
         if(this.keys.get(65) && this.posX - speed >= 0) { this.posX -= speed }
         if(this.keys.get(68)) { this.posX += speed }
         if(this.keys.get(87) && this.posY - speed >= 0) { this.posY -= speed }
@@ -108,7 +108,7 @@ class RenderEngine {
         this.ctx.translate(this.viewport.x % this.blockSize, this.viewport.y % this.blockSize)
         this.worldRender(this.minX , this.minY, this.maxX, this.maxY )
         this.ctx.restore()
-
+        // DRAWING 'PLAYER'
         this.drawBlock(this.posX + this.viewport.x, this.posY + this.viewport.y, this.blockSize, this.blockSize, 'red')
 
         requestAnimationFrame(this.render.bind(this))

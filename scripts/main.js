@@ -1,5 +1,6 @@
 let canvas = document.getElementById('canvas')
 // seed: 8137774
+
 let world = new World({
     chunkSize: 0,
     noiseLevel: 0,
