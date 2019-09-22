@@ -30,6 +30,7 @@ var Controls = function() {
     if(isMobile.any()){
         let keysDiv = document.getElementById('keys')
         let mobileKeys = document.querySelectorAll('.key')
+        let fullscreenBtn = document.getElementById('fullscreen')
         mobileKeys.forEach(x => {
             x.addEventListener('touchstart', (e) => {
                 keys[x.value] = true
@@ -38,6 +39,18 @@ var Controls = function() {
                 keys[x.value] = false
             })
         });
+        fullscreenBtn.addEventListener('click', () => {
+            if (document.body.requestFullscreen) {
+                document.body.requestFullscreen();
+              } else if (document.body.msRequestFullscreen) {
+                document.body.msRequestFullscreen();
+              } else if (document.body.mozRequestFullScreen) {
+                document.body.mozRequestFullScreen();
+              } else if (document.body.webkitRequestFullscreen) {
+                document.body.webkitRequestFullscreen();
+              }
+        })
+        fullscreenBtn.style.display = 'block'
         keysDiv.style.display = 'grid'
     }
     return {

@@ -62,3 +62,15 @@ canvas {
     left: 1px;
     top: 1px;
 }
+
+#fullscreen {
+    position: absolute;
+    display: none;
+    opacity: 0.6;
+    z-index: 1;
+    right: 0;
+    width: 100px;
+    height: 50px;
+    background-color: steelblue;
+    border: 1px solid black
+}
